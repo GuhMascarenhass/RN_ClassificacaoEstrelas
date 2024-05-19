@@ -1,23 +1,27 @@
 import os
+
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import keras
 import tensorflow as tf
 import pandas as pd
 import numpy as np
 
+
 # Função para salvar o modelo treinado
-def salvar_modelo(model, caminho_arquivo):
-    model.save(caminho_arquivo)
+def salvar_modelo(modelo, caminho_arquivo):
+    modelo.save(caminho_arquivo)
     print(f"Modelo salvo em: {caminho_arquivo}")
+
 
 # Função para carregar o modelo treinado
 def carregar_modelo(caminho_arquivo):
-    model = keras.models.load_model(caminho_arquivo)
+    modelo = keras.models.load_model(caminho_arquivo)
     print(f"Modelo carregado de: {caminho_arquivo}")
-    return model
+    return modelo
+
 
 # Carregar o dataset
-data_set = pd.read_csv(r"C:\Users\gustavo\Desktop\6 class csv.csv")
+data_set = pd.read_csv(r"6 class csv.csv")
 
 # Extração das variáveis
 temperatura = data_set["Temperature (K)"].values
@@ -55,11 +59,11 @@ model = keras.Sequential([
 model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=['accuracy'])
 
 # Treinamento do modelo
-model.fit(data_set_compact, epochs=3000)
+#model.fit(data_set_compact, epochs=3000)
 
 # Salvar o modelo treinado
-caminho_modelo = r"C:\Users\gustavo\Desktop\modelo_rede_neural.keras"
-salvar_modelo(model, caminho_modelo)
+# caminho_modelo = r"C:\Users\gustavo\Desktop\modelo_rede_neural.keras"
+# salvar_modelo(model, caminho_modelo)
 
 # Previsões
 
@@ -72,7 +76,7 @@ x = np.array([
 ], dtype=float)
 
 # Carregar o modelo salvo
-model_carregado = carregar_modelo(caminho_modelo)
+model_carregado = carregar_modelo("modelo_rede_neural.keras")
 
 # Previsões com o modelo carregado
 resultado_RN = np.argmax(model_carregado.predict(x), axis=1)
@@ -80,6 +84,6 @@ resultado_RN = np.argmax(model_carregado.predict(x), axis=1)
 # Impressão dos resultados
 print("Categorias previstas para as estrelas:")
 for i, categoria in enumerate(resultado_RN):
-    print(f"Estrela {i+1}: Categoria {categoria}")
+    print(f"Estrela {i + 1}: Categoria {categoria}")
 
 print(model_carregado.summary())
