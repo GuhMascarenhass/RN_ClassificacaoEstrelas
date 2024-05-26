@@ -83,6 +83,7 @@ novos_dados_estrelas = np.array([[2650, 0.11, 17.45],
                                  [13720, 0.00892, 12.97],
                                  [6850, 1467, -10.07]])
 
+
 # Previsões com o modelo treinado nos novos dados de estrelas
 resultado_RN = model.predict(novos_dados_estrelas)
 
