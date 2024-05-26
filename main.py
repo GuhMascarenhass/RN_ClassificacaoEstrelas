@@ -1,94 +1,94 @@
-import os
-
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import keras
 
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import random
+
+# def gerar_dados_estrelas(n):
+#     novos_dados = []
+#
+#     for _ in range(n):
+#         temp = round(random.uniform(2500, 40000), 1)  # Temperatura em Kelvin
+#         raio = round(random.uniform(0.1, 2000), 3)  # Raio relativo ao Sol
+#         magn = round(random.uniform(-10, 20), 2)  # Magnitude absoluta
+#
+#         if temp >= 30000.0:
+#             spc_class = 0  # classe O
+#         elif temp >= 10000.0:
+#             spc_class = 1  # classe B
+#         elif temp >= 7500.0:
+#             spc_class = 2  # classe A
+#         elif temp >= 6000.0:
+#             spc_class = 3  # classe F
+#         elif temp >= 5200.0:
+#             spc_class = 4  # classe G
+#         elif temp >= 3700.0:
+#             spc_class = 5  # classe K
+#         else:
+#             spc_class = 6  # classe M
+#
+#         novos_dados.append([temp, raio, magn, spc_class])
+#
+#         with open("dados.txt", mode="a") as file:
+#             # Formatar os dados em uma única string
+#             linha = f"{temp}, {raio}, {magn}, {spc_class}\n"
+#             file.write(linha)
+#
+#     return novos_dados
 
 
-def gerar_dados_estrelas(n):
-    novos_dados = []
-
-    for _ in range(n):
-        temp = round(random.uniform(2500, 40000), 1)  # Temperatura em Kelvin
-        raio = round(random.uniform(0.1, 2000), 3)  # Raio relativo ao Sol
-        magn = round(random.uniform(-10, 20), 2)  # Magnitude absoluta
-
-        if temp>= 30000.0:
-            spc_class = 0  # classe O
-        elif temp >= 10000.0:
-            spc_class = 1  # classe B
-        elif temp >= 7500.0:
-            spc_class = 2  # classe A
-        elif temp >= 6000.0:
-            spc_class = 3  # classe F
-        elif temp >= 5200.0:
-            spc_class = 4  # classe G
-        elif temp >= 3700.0:
-            spc_class = 5  # classe K
-        else:
-            spc_class = 6  # classe M
-
-        novos_dados.append([temp, raio, magn, spc_class])
-
-        with open("dados.txt", mode="a") as file:
-            # Formatar os dados em uma única string
-            linha = f"{temp}, {raio}, {magn}, {spc_class}\n"
-            file.write(linha)
-
-    return novos_dados
-
-
-# Carregar o dataset
+#Carregar o dataset
 data_set = pd.read_csv("stars.csv")
+
+data_set.replace({"Spectral Class": {'O': 0, 'B': 1, 'A': 2, 'F': 3, 'G': 4, 'K': 5, 'M': 6}}, inplace = True)
 
 # Extração das variáveis
 temperatura = data_set["Temperature (K)"].values
 radius = data_set["Radius(R/Ro)"].values
 magnitude = data_set["Absolute magnitude(Mv)"].values
 spectro = data_set["Spectral Class"].values
-
-# Transformar a classe espectral em números
-spectro_dict = {'O': 0, 'B': 1, 'A': 2, 'F': 3, 'G': 4, 'K': 5, 'M': 6}
-
 # Criar um array de mesma forma que star_typer, preenchido com os valores numéricos das classes espectrais
-spectro_numeric = np.array([spectro_dict[s] for s in spectro])
+spectro_numeric = np.array(spectro)
 # Combinação das características em um único array
-features = np.stack([temperatura, radius, magnitude, spectro_numeric], axis=1)
+features = np.stack([temperatura, radius, magnitude], axis=1)
 
 # Normalização dos dados de entrada
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(features)
 
 # Dividir os dados em conjuntos de treinamento e validação
-X_train, X_val, y_train, y_val = train_test_split(X_scaled, spectro_numeric, test_size=0.1, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(X_scaled, spectro, test_size=0.3, random_state=100)
 
 # Definição do modelo
 model = keras.Sequential([
-    keras.layers.Input(shape=(4,), name="FirstInput"),
-    keras.layers.Dense(8, activation="relu", kernel_initializer='glorot_uniform', name="layer1"),
-    keras.layers.Dense(8, activation="relu", kernel_initializer='glorot_uniform', name="layer2"),
-    keras.layers.Dense(7, activation="softmax", kernel_initializer='glorot_uniform', name="output")
+    keras.layers.Input(shape=(3,), name="FirstInput"),
+    keras.layers.Dense(32, name="layer1"),
+    keras.layers.Dense(32, name="layer2"),
+    keras.layers.Dense(7, activation="softmax", name="output")
 ])
 
-# Compilação do modelo com Adam optimizer e sparse_categorical_crossentropy loss
-optimizer = keras.optimizers.Adam(learning_rate=0.001)
-model.compile(optimizer=optimizer, loss="sparse_categorical_crossentropy", metrics=['accuracy'])
+#
+model.compile(optimizer="Adam", loss="sparse_categorical_crossentropy", metrics=['accuracy'])
 
 # Treinamento do modelo com 40 épocas e parada antecipada
-callback_early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
-model.fit(X_train, y_train, epochs=80, validation_data=(X_val, y_val), callbacks=[callback_early_stopping])
+callback_early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
+history = model.fit(X_train, y_train, epochs=100, validation_data=(X_val, y_val), callbacks=[callback_early_stopping])
 
 # Salvar o modelo treinado
 model.save("modelo_treinado.keras")
+# Carregar modelo
+model = keras.models.load_model("modelo_treinado.keras")
 
 # Geração de novos dados de estrelas
-novos_dados_estrelas = gerar_dados_estrelas(30)
-novos_dados_estrelas = np.array(novos_dados_estrelas)
+
+
+novos_dados_estrelas = np.array([[2650, 0.11, 17.45],
+                                 [9675, 0.0109, 13.98],
+                                 [12010, 0.0092, 12.13],
+                                 [10980, 0.0087, 11.19],
+                                 [13720, 0.00892, 12.97],
+                                 [6850, 1467, -10.07]])
 
 # Previsões com o modelo treinado nos novos dados de estrelas
 resultado_RN = model.predict(novos_dados_estrelas)
@@ -107,7 +107,10 @@ for i, categoria in enumerate(resultado_RN):
     classe_espectral = spectro_dict_revers[indice_max_probabilidade]
 
     print(f"Estrela {i + 1}: Classe espectral {classe_espectral}")
-
+print("=-"*30)
 print(resultado_RN)
-
+print("=-"*30)
+print("Dados de entrada para classificação: ")
 print(novos_dados_estrelas)
+
+
