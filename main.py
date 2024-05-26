@@ -48,8 +48,7 @@ temperatura = data_set["Temperature (K)"].values
 radius = data_set["Radius(R/Ro)"].values
 magnitude = data_set["Absolute magnitude(Mv)"].values
 spectro = data_set["Spectral Class"].values
-# Criar um array de mesma forma que star_typer, preenchido com os valores numéricos das classes espectrais
-spectro_numeric = np.array(spectro)
+
 # Combinação das características em um único array
 features = np.stack([temperatura, radius, magnitude], axis=1)
 
@@ -68,21 +67,15 @@ model = keras.Sequential([
     keras.layers.Dense(7, activation="softmax", name="output")
 ])
 
-#
 model.compile(optimizer="Adam", loss="sparse_categorical_crossentropy", metrics=['accuracy'])
 
 # Treinamento do modelo com 40 épocas e parada antecipada
 callback_early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
-history = model.fit(X_train, y_train, epochs=100, validation_data=(X_val, y_val), callbacks=[callback_early_stopping])
+model.fit(X_train, y_train, epochs=100, validation_data=(X_val, y_val), callbacks=[callback_early_stopping])
 
 # Salvar o modelo treinado
 model.save("modelo_treinado.keras")
-# Carregar modelo
-model = keras.models.load_model("modelo_treinado.keras")
-
-# Geração de novos dados de estrelas
-
-
+# entrada dos dados
 novos_dados_estrelas = np.array([[2650, 0.11, 17.45],
                                  [9675, 0.0109, 13.98],
                                  [12010, 0.0092, 12.13],
@@ -95,7 +88,7 @@ resultado_RN = model.predict(novos_dados_estrelas)
 
 # Impressão dos resultados
 np.set_printoptions(suppress=True)
-# Dicionário reverso para mapear índices de classe para letras espectrais
+
 spectro_dict_revers = {0: 'O', 1: 'B', 2: 'A', 3: 'F', 4: 'G', 5: 'K', 6: 'M'}
 
 print("Categorias previstas para as estrelas:")
