@@ -105,5 +105,3 @@ print(resultado_RN)
 print("=-"*30)
 print("Dados de entrada para classificação: ")
 print(novos_dados_estrelas)
-
-
