@@ -86,7 +86,7 @@ novos_dados_estrelas = np.array([[2650, 0.11, 17.45],
 # Previsões com o modelo treinado nos novos dados de estrelas
 resultado_RN = model.predict(novos_dados_estrelas)
 
-# Impressão dos resultados
+# Impressão dos resultados.
 np.set_printoptions(suppress=True)
 
 spectro_dict_revers = {0: 'O', 1: 'B', 2: 'A', 3: 'F', 4: 'G', 5: 'K', 6: 'M'}
