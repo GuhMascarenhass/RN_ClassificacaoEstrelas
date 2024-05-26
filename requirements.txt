@@ -40,3 +40,5 @@ urllib3==2.2.1
 Werkzeug==3.0.2
 wheel==0.43.0
 wrapt==1.16.0
+
+scikit-learn~=1.4.2
